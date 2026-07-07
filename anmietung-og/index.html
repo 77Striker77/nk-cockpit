@@ -302,6 +302,13 @@
     </div>
     <div class="card" style="margin-top:16px"><div class="tblwrap"><table class="cmp" id="vHist"></table></div>
       <div class="hintline" style="border:0">Warm gesamt = Kaltmiete + BK-Vorauszahlung + Reinigung + Stellplatz + Internet. Die BK-Vorauszahlung wurde zum 01.01.2024 von 272 € auf 182,60 €/Monat (BK 167,60 + Reinigung 15) gesenkt — bei gleichzeitig steigenden Kosten der Hauptgrund für die Nachzahlung 2024.</div></div>
+
+    <div class="sechead" style="margin-top:22px"><h2 style="font-size:17px">Erhöhungs-Wächter (§ 558 BGB)</h2>
+      <span class="hint">Kappungsgrenze, Vergleichsmieten-Deckel und Sperrfristen — laufend gegen die Historie gerechnet</span></div>
+    <div class="fcgrid">
+      <div class="card fc-panel" id="mwPanel"></div>
+      <div class="card notes"><h3>Rechtsrahmen &amp; Einordnung</h3><div id="mwNotes"></div></div>
+    </div>
   </section>
 
   <div class="domain" id="nk">
@@ -1047,6 +1054,49 @@ NOTES.forEach(n=>{const it=el("div","note-item");it.innerHTML='<div class="ic se
     s+='</svg>';host.innerHTML=s;
     host.querySelectorAll("[data-svgtip]").forEach(nd=>{nd.style.cursor="pointer";
       nd.addEventListener("mousemove",e=>showPop(e,"<b>"+nd.getAttribute("data-svgtip")+"</b>"));nd.addEventListener("mouseleave",hidePop);});
+  })();
+
+  // Erhöhungs-Wächter — § 558 BGB gegen die Historie; rechnet mit dem Anzeigedatum weiter
+  (function(){
+    const panel=document.getElementById("mwPanel"),nb=document.getElementById("mwNotes");
+    if(!panel||!nb)return;
+    const MW={kapp:0.15,kulisseSeit:"01.01.2026",spiegel:12.65,spiegelStand:"Mietspiegel 2024"};
+    const pDt=s=>{const p=s.split(".");return new Date(+p[2],+p[1]-1,+p[0]);};
+    const addM=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x;};
+    const fmtD=d=>d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"});
+    const heute=new Date();
+    const rentAt=d=>{let v=H[0].kalt;H.forEach(r=>{if(pDt(r.ab)<=d)v=r.kalt;});return v;};
+    const spiegelDeckel=MW.spiegel*VERTRAG.flaecheA;
+    const deckelAt=d=>{const basis=rentAt(addM(d,-36));const kapp=basis*(1+MW.kapp);return{basis,kapp,max:Math.min(kapp,spiegelDeckel)};};
+    const now=deckelAt(heute), spielraum=now.max-cur.kalt;
+    let nextD=null;H.forEach(r=>{const t=addM(pDt(r.ab),36);if(t>heute&&r.kalt!==now.basis&&(!nextD||t<nextD))nextD=t;});
+    const next=nextD?deckelAt(nextD):null;
+    const lastAb=pDt(cur.ab), verlangenAb=addM(lastAb,12), wirksamAb=addM(lastAb,15);
+    const kv=(k,v,cls)=>'<div class="fc-meta'+(cls?" "+cls:"")+'"><span class="k">'+k+'</span><span class="v" style="text-align:right;max-width:52%">'+v+'</span></div>';
+    const head=spielraum>0.005
+      ?'<div class="fc-big due">+'+eur(spielraum)+'</div><div class="fc-sub">wäre heute als Erhöhung maximal durchsetzbar (bindender Deckel '+eur(now.max)+')</div>'
+      :'<div class="fc-big credit">0,00 €</div><div class="fc-sub">Erhöhungs-Spielraum heute — der bindende Deckel ('+eur(now.max)+') liegt '+(now.max<cur.kalt?eur(cur.kalt-now.max)+' unter':'auf Höhe')+' der aktuellen Kaltmiete</div>';
+    panel.innerHTML=
+      '<div class="cap" style="font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-faint);font-weight:600">Zulässige Erhöhung heute · Stand '+fmtD(heute)+'</div>'+head+
+      '<div class="fc-derive">'+
+      kv("Kappungsbasis — Kaltmiete am "+fmtD(addM(heute,-36)),eur(now.basis))+
+      kv("Kappungsgrenze 15 % (§ 558 III BGB · seit "+MW.kulisseSeit+")",eur(now.kapp))+
+      kv("Vergleichsmieten-Deckel ("+MW.spiegelStand+": 12,65 €/m² × 83,8 m²)",eur(spiegelDeckel))+
+      kv("Aktuelle Kaltmiete",eur(cur.kalt))+
+      kv("Bindend ist der niedrigere Deckel",eur(now.max),"strong")+
+      (next?kv("Vorschau ab "+fmtD(nextD)+" (neue Basis "+eur(next.basis)+")",(next.max-cur.kalt>0.005?"+"+eur(next.max-cur.kalt)+" möglich":"weiter kein Spielraum")):"")+
+      kv("Sperrfristen (§ 558 I BGB)","Verlangen zulässig seit "+fmtD(verlangenAb)+" · wirksam frühestens "+fmtD(wirksamAb))+
+      '</div>'+
+      '<div class="caption" style="padding-top:12px">Rechnet mit dem Anzeigedatum weiter: Basis = Kaltmiete vor 36 Monaten laut Historie. Die 15 % gelten, solange die Gemeinde in der BW-Gebietskulisse liegt (Verordnung zunächst bis Ende 2026); außerhalb der Kulisse gälten 20 % ('+eur(now.basis*1.2)+').</div>';
+    const erhBasis=rentAt(addM(pDt(cur.an),-36));
+    const erhPct=((cur.kalt/erhBasis-1)*100).toFixed(1).replace(".",",");
+    const MWNOTES=[
+      {s:"warn",t:"Erhöhung 2025 prüfenswert",d:"+"+erhPct+" % gegenüber der Kaltmiete drei Jahre vor Zugang des Verlangens ("+cur.an+") — über 15 %, unter 20 %. Damals galt die alte Gebietskulisse (2020–2025, 89 Gemeinden): War die Gemeinde schon darin, wäre alles oberhalb von "+eur(erhBasis*1.15)+" unwirksam gewesen (§ 558 III BGB). Das ist ungeprüft."},
+      {s:"crit",t:"Seit 01.01.2026 gilt hier 15 % statt 20 %",d:"Die Gemeinde liegt in der neuen BW-Gebietskulisse (130 Kommunen, Verordnung zunächst bis 31.12.2026). Zusätzlich gilt die Mietpreisbremse — sie betrifft aber nur Neuvermietungen, nicht den laufenden Vertrag."},
+      {s:"info",t:"Vergleichsmiete ist die zweite Grenze",d:"Jede Erhöhung endet an der ortsüblichen Vergleichsmiete (§ 558 I BGB) — zuletzt "+MW.spiegelStand+" mit 12,65 €/m². Erst ein neuer Mietspiegel verschiebt diesen Deckel; jedes Erhöhungsschreiben daran messen."},
+      {s:"info",t:"Verfahren &amp; deine Rechte",d:"Textform mit Begründung (§ 558a) · Überlegungsfrist: Zustimmung erst bis Ende des 2. Monats nach Zugang (§ 558b II) · Sonderkündigungsrecht bei jeder Erhöhung (§ 561)."}
+    ];
+    MWNOTES.forEach(n=>{const it=el("div","note-item");it.innerHTML='<div class="ic sev-'+n.s+'">'+(n.s==="crit"?"!":n.s==="warn"?"›":"i")+'</div><div class="tx"><b>'+n.t+'</b><br>'+n.d+'</div>';nb.appendChild(it);});
   })();
 })();
 
