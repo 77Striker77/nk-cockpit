@@ -311,10 +311,14 @@
       <span class="hint">Deine eigene Erfassung — unabhängig von der Vermieter-Abrechnung</span></div>
 
     <div class="card" style="padding:18px 22px">
-      <div class="chart-head" style="margin-bottom:12px"><h3>Jeder Zähler in seiner eigenen Einheit &amp; Skala
-        <span class="info" tabindex="0" data-tip="Jeder Zähler hat seine eigene kleine Grafik mit echter Skala und Einheit (m³, MWh, kWh). Die tatsächlichen Werte bleiben erhalten — nichts wird auf eine gemeinsame Norm gebracht.">i</span></h3></div>
-      <div class="mini-grid" id="meterMini"></div>
-      <div class="hintline" style="border:0;padding:10px 0 0">„≈" = Strom, aus unregelmäßigen Ablesungen auf Kalenderjahre geschätzt. Die reinen Ablese-Werte stehen weiter unten.</div>
+      <div class="chart-head" style="margin-bottom:12px"><h3>Verbrauch je Einheit — durchschaltbar
+        <span class="info" tabindex="0" data-tip="Wähle oben die Einheit. Alle Zähler derselben Einheit teilen sich eine Grafik und dieselbe echte Skala — das ist ohne Normierung korrekt. „≈"/gestrichelt = Strom, aus Ablesungen geschätzt.">i</span></h3></div>
+      <div class="controls" style="border:0;background:transparent;padding:0 0 12px">
+        <div class="ctl"><span class="lb">Einheit</span><div class="seg" id="meterTabs"></div></div>
+        <div class="legend" id="meterLegend" style="margin-left:auto;align-self:flex-end"></div>
+      </div>
+      <div id="meterUnitChart"></div>
+      <div class="hintline" style="border:0;padding:10px 0 0">Gleiche Einheit = gleiche Skala (keine Normierung). Reine Strom-Ablesewerte stehen weiter unten.</div>
     </div>
 
     <div class="sechead" style="margin-top:22px"><h2 style="font-size:17px">Verbrauchszähler (Jahreswerte)</h2>
@@ -746,32 +750,42 @@ NOTES.forEach(n=>{const it=el("div","note-item");it.innerHTML='<div class="ic se
     mh+='<tr><td>'+r[0]+'</td><td>'+eur(r[1])+'</td><td>'+eur(r[2])+(drop?' <span class="dpill down" data-tip="gegenüber vorher gesenkt">gesenkt</span>':'')+'</td></tr>';});
   mt.innerHTML=mh;
 
-  // Kleine Einzelgrafiken je Zähler — echte Werte, eigene Skala & Einheit
+  // Verbrauch je Einheit — Liniengraph, umschaltbar (gleiche Einheit = gleiche Skala)
   (function(){
-    const host=document.getElementById("meterMini");if(!host)return;host.innerHTML="";
-    const fmtV=(v,u)=>u==="kWh"?Math.round(v).toLocaleString("de-DE"):v.toLocaleString("de-DE",{minimumFractionDigits:u==="MWh"?2:1,maximumFractionDigits:2});
-    METERS.forEach(m=>{
-      const vals=m.v, nn=vals.filter(x=>x!=null);
-      let last=null;for(let i=vals.length-1;i>=0;i--){if(vals[i]!=null){last=vals[i];break;}}
-      const card=el("div","mini-card");
-      card.innerHTML='<div class="mini-head"><span class="mdot" style="background:'+m.col+'"></span><b>'+m.name+'</b>'+
-        (m.est?'<span class="mini-tag">≈ gesch.</span>':'')+'<span class="mlast">'+(last!=null?fmtV(last,m.unit)+' '+m.unit:'—')+'</span></div>';
-      const W=240,H=130,padL=6,padR=6,padT=20,padB=18,bw=(W-padL-padR)/MJAHRE.length;
-      const max=(nn.length?Math.max(...nn):1)*1.2||1;
-      const y=v=>padT+(H-padT-padB)*(1-v/max);
-      let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block">';
-      s+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y(0).toFixed(1)+'" y2="'+y(0).toFixed(1)+'" stroke="var(--line)" stroke-width="1"/>';
-      MJAHRE.forEach((yr,i)=>{const cx=padL+bw*i+bw/2,v=vals[i];
-        if(v!=null){const barW=Math.min(28,bw*0.56),yy=y(v);
-          s+='<rect x="'+(cx-barW/2).toFixed(1)+'" y="'+yy.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+(y(0)-yy).toFixed(1)+'" rx="3" fill="'+m.col+'"'+(m.est?' opacity="0.72"':'')+' data-svgtip="'+m.name+' '+yr+': '+(m.est?'≈ ':'')+fmtV(v,m.unit)+' '+m.unit+'"/>';
-          s+='<text x="'+cx.toFixed(1)+'" y="'+(yy-4).toFixed(1)+'" text-anchor="middle" class="lbl" font-size="9.5" fill="var(--ink-soft)">'+(m.est?'≈':'')+fmtV(v,m.unit)+'</text>';}
-        s+='<text x="'+cx.toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="Calibri,Segoe UI,system-ui,sans-serif">’'+String(yr).slice(2)+'</text>';});
+    if(!document.getElementById("meterUnitChart"))return;
+    function niceUp(v){if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;const nm=m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10;return nm*e;}
+    const shortN=n=>n.replace("Wohneinheit","Whg.").replace("Wohnung","W.").replace("Wärmemengenzähler","Wärme").replace("Allgemein","Allg.");
+    const labelOf=u=>({"m³":"Wasser · m³","MWh":"Wärme · MWh","kWh":"Strom · kWh"})[u]||u;
+    const units=[];METERS.forEach(m=>{if(!units.includes(m.unit))units.push(m.unit);});
+    let cur=units[0];
+    function render(){
+      const tabs=document.getElementById("meterTabs");tabs.innerHTML="";
+      units.forEach(u=>{const b=el("button",u===cur?"on":"",labelOf(u));b.onclick=()=>{cur=u;render();};tabs.appendChild(b);});
+      const group=METERS.filter(m=>m.unit===cur);
+      document.getElementById("meterLegend").innerHTML=group.map(m=>'<span><i style="background:'+m.col+'"></i>'+shortN(m.name)+(m.est?' ≈':'')+'</span>').join("");
+      const fmtV=v=>cur==="kWh"?Math.round(v).toLocaleString("de-DE"):v.toLocaleString("de-DE",{minimumFractionDigits:cur==="MWh"?2:1,maximumFractionDigits:2});
+      const years=MJAHRE,W=720,H=300,padL=54,padR=150,padT=16,padB=34;
+      const xc=k=>padL+(W-padL-padR)*(k/(years.length-1));
+      const allV=group.flatMap(m=>m.v.filter(x=>x!=null));
+      const nice=niceUp(allV.length?Math.max(...allV):1);
+      const y=v=>padT+(H-padT-padB)*(1-v/nice);
+      let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Verbrauch '+cur+'">';
+      for(let g=0;g<=4;g++){const gv=nice*g/4,yy=y(gv);
+        s+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+yy.toFixed(1)+'" y2="'+yy.toFixed(1)+'" stroke="#E8EDF3" stroke-width="'+(g===0?1.5:1)+'"/>';
+        s+='<text x="'+(padL-8)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end" class="axis">'+fmtV(gv)+'</text>';}
+      years.forEach((yr,k)=>{s+='<text x="'+xc(k).toFixed(1)+'" y="'+(H-14)+'" text-anchor="middle" class="axis" font-size="13" font-weight="700" fill="var(--ink)">'+yr+'</text>';});
+      group.forEach(m=>{const P=[];years.forEach((yr,k)=>{if(m.v[k]!=null)P.push({x:xc(k),yy:y(m.v[k]),v:m.v[k],yr});});
+        if(!P.length)return;
+        s+='<path d="'+P.map((q,i)=>(i?"L":"M")+q.x.toFixed(1)+" "+q.yy.toFixed(1)).join(" ")+'" fill="none" stroke="'+m.col+'" stroke-width="2.4"'+(m.est?' stroke-dasharray="5 4"':'')+'/>';
+        P.forEach(q=>{s+='<circle cx="'+q.x.toFixed(1)+'" cy="'+q.yy.toFixed(1)+'" r="4" fill="'+m.col+'" stroke="#fff" stroke-width="1.5" data-svgtip="'+m.name+' '+q.yr+': '+(m.est?'≈ ':'')+fmtV(q.v)+' '+cur+'"/>';});
+        const last=P[P.length-1];
+        s+='<text x="'+(last.x+9).toFixed(1)+'" y="'+(last.yy+4).toFixed(1)+'" font-size="11" font-weight="600" fill="'+m.col+'">'+shortN(m.name)+'</text>';});
       s+='</svg>';
-      card.insertAdjacentHTML("beforeend",s);
-      host.appendChild(card);
-    });
-    host.querySelectorAll("[data-svgtip]").forEach(nd=>{nd.style.cursor="pointer";
-      nd.addEventListener("mousemove",e=>showPop(e,"<b>"+nd.getAttribute("data-svgtip")+"</b>"));nd.addEventListener("mouseleave",hidePop);});
+      const host=document.getElementById("meterUnitChart");host.innerHTML=s;
+      host.querySelectorAll("[data-svgtip]").forEach(nd=>{nd.style.cursor="pointer";
+        nd.addEventListener("mousemove",e=>showPop(e,"<b>"+nd.getAttribute("data-svgtip")+"</b>"));nd.addEventListener("mouseleave",hidePop);});
+    }
+    render();
   })();
 })();
 
