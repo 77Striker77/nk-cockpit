@@ -163,6 +163,19 @@
   .term-date small{display:block;font-weight:600;color:var(--ink-faint);font-size:11px}
   .term-item .tx{color:var(--ink-soft)} .term-item .tx b{color:var(--ink)}
   .lawwarn{background:var(--warn-bg);border:1px solid #E4CFA4;color:#6b4a12;border-radius:10px;padding:10px 14px;font-size:12.5px;margin:12px 0 0;font-weight:600}
+
+  /* Erhöhungs-Wächter: Urteil → Skala → Simulator → Rechenweg */
+  .mw-verdict{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
+  .mw-verdict .mw-ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;flex:none}
+  .mw-verdict.ok .mw-ic{background:var(--good)} .mw-verdict.due .mw-ic{background:var(--warn)}
+  .mw-verdict .mw-t{font-family:var(--serif);font-size:19px;line-height:1.25;text-wrap:balance}
+  .mw-verdict.ok .mw-t{color:var(--good)} .mw-verdict.due .mw-t{color:var(--warn)}
+  .mw-why{font-size:13px;color:var(--ink-soft);margin-top:4px}
+  .mw-why b{color:var(--ink)}
+  .mw-next{margin-top:14px;background:var(--info-bg);border:1px solid var(--info-line);border-radius:10px;padding:10px 14px;font-size:13px;color:#2f4258;line-height:1.5}
+  .mw-next b{color:var(--brand)}
+  .mw-sim{border-top:1px solid var(--line-soft);margin-top:16px;padding-top:14px}
+  .simbadge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--warn-bg);color:var(--warn);margin-left:8px;vertical-align:1px;white-space:nowrap}
   .stand{font-size:12px;color:var(--ink-faint);margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft)}
   .tile.due .big{color:var(--crit)} .tile.due::after{background:var(--crit)}
 
@@ -345,7 +358,7 @@
       <div class="hintline" style="border:0">Warm gesamt = Kaltmiete + BK-Vorauszahlung + Reinigung + Stellplatz + Internet. Die BK-Vorauszahlung wurde zum 01.01.2024 von 272 € auf 182,60 €/Monat (BK 167,60 + Reinigung 15) gesenkt — bei gleichzeitig steigenden Kosten der Hauptgrund für die Nachzahlung 2024.</div></div>
 
     <div class="sechead" style="margin-top:22px"><h2 style="font-size:17px">Erhöhungs-Wächter (§ 558 BGB)</h2>
-      <span class="hint">Kappungsgrenze, Vergleichsmieten-Deckel und Sperrfristen — laufend gegen die Historie gerechnet, mit Mietspiegel-Simulator</span></div>
+      <span class="hint">Kann der Vermieter gerade erhöhen? Urteil, nächster Termin und Deckel-Skala — Rechenweg zum Aufklappen, Mietspiegel simulierbar</span></div>
     <div class="fcgrid">
       <div class="card fc-panel" id="mwPanel"></div>
       <div class="card notes"><h3>Rechtsrahmen &amp; Einordnung</h3><div id="mwNotes"></div></div>
@@ -1143,7 +1156,7 @@ NOTES.forEach(n=>{const it=el("div","note-item");it.innerHTML='<div class="ic se
   })();
 
   // Erhöhungs-Wächter — § 558 BGB gegen die Historie; rechnet mit dem Anzeigedatum weiter.
-  // Simulator: Vergleichsmiete verschiebbar (künftiger Mietspiegel); Guard warnt nach Ablauf des geprüften Rechtsstands.
+  // Aufbau: Klartext-Urteil → nächster Termin → Deckel-Skala → Was-wäre-wenn-Simulator → Rechenweg (aufklappbar).
   (function(){
     const panel=document.getElementById("mwPanel"),nb=document.getElementById("mwNotes");
     if(!panel||!nb)return;
@@ -1155,49 +1168,87 @@ NOTES.forEach(n=>{const it=el("div","note-item");it.innerHTML='<div class="ic se
     const rentAt=d=>{let v=H[0].kalt;H.forEach(r=>{if(pDt(r.ab)<=d)v=r.kalt;});return v;};
     const basisHeute=rentAt(addM(heute,-36)), kappHeute=basisHeute*(1+MW.kapp);
     let nextD=null;H.forEach(r=>{const t=addM(pDt(r.ab),36);if(t>heute&&r.kalt!==basisHeute&&(!nextD||t<nextD))nextD=t;});
-    const lastAb=pDt(cur.ab), verlangenAb=addM(lastAb,12), wirksamAb=addM(lastAb,15);
+    const lastAb=pDt(cur.ab), verlangenAb=addM(lastAb,12);
     const kv=(k,v,cls)=>'<div class="fc-meta'+(cls?" "+cls:"")+'"><span class="k">'+k+'</span><span class="v" style="text-align:right;max-width:52%">'+v+'</span></div>';
     panel.innerHTML=
       (veraltet?'<div class="lawwarn" style="margin:0 0 12px">⚠ Rechtsstand veraltet — zuletzt geprüft am '+RECHTSSTAND.geprueft+'. Die 15-%-Kulisse war bis 31.12.2026 befristet und der Mietspiegel kann abgelöst sein; die Werte unten sind nicht mehr belastbar. Rechtsrahmen neu prüfen.</div>':'')+
-      '<div class="cap" style="font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-faint);font-weight:600">Zulässige Erhöhung heute · Stand '+fmtD(heute)+'</div>'+
+      '<div class="cap" style="font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-faint);font-weight:600">Erhöhungs-Check · Stand '+fmtD(heute)+'</div>'+
       '<div id="mwHead"></div>'+
-      '<div class="sliderrow" style="margin-top:16px"><label><span class="lt">Vergleichsmiete (Simulator) <span class="info" tabindex="0" data-tip="Ortsübliche Vergleichsmiete in €/m². Startwert 12,65 = Mietspiegel 2024 (aus dem Erhöhungsschreiben 2025). Verschieben simuliert einen künftigen Mietspiegel — Deckel und Spielraum rechnen live mit.">i</span></span><span class="rv" id="msimV">12,65 €/m²</span></label>'+
-      '<input type="range" id="msim" min="11.50" max="15.00" step="0.05" value="12.65"></div>'+
-      '<div class="fc-derive">'+
-      kv("Kappungsbasis — Kaltmiete am "+fmtD(addM(heute,-36)),eur(basisHeute))+
-      kv("Kappungsgrenze 15 % (§ 558 III BGB · seit "+MW.kulisseSeit+")",eur(kappHeute))+
-      '<div class="fc-meta"><span class="k" id="mwSpiegelK">Vergleichsmieten-Deckel</span><span class="v" style="text-align:right;max-width:52%" id="mwSpiegel">–</span></div>'+
-      kv("Aktuelle Kaltmiete",eur(cur.kalt))+
-      '<div class="fc-meta strong"><span class="k">Bindend ist der niedrigere Deckel</span><span class="v" style="text-align:right;max-width:52%" id="mwMax">–</span></div>'+
-      (nextD?'<div class="fc-meta"><span class="k" id="mwNextK">Vorschau</span><span class="v" style="text-align:right;max-width:52%" id="mwNext">–</span></div>':"")+
-      kv("Sperrfristen (§ 558 I BGB)","Verlangen zulässig seit "+fmtD(verlangenAb)+" · wirksam frühestens "+fmtD(wirksamAb))+
+      '<div class="mw-next" id="mwNextRow"></div>'+
+      '<div id="mwGauge" style="margin-top:14px"></div>'+
+      '<div class="mw-sim">'+
+        '<div class="cap" style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-faint);font-weight:600">Was wäre bei einem neuen Mietspiegel? <span class="simbadge" id="mwSimBadge" hidden>Simulation aktiv</span></div>'+
+        '<div class="sliderrow" style="margin-top:8px"><label><span class="lt">Vergleichsmiete <span class="info" tabindex="0" data-tip="Ortsübliche Vergleichsmiete in €/m². Startwert 12,65 = Mietspiegel 2024 (aus dem Erhöhungsschreiben 2025). Verschieben spielt einen künftigen Mietspiegel durch — Urteil, Termin-Zeile und Skala rechnen live mit.">i</span></span><span class="rv" id="msimV">12,65 €/m²</span></label>'+
+        '<input type="range" id="msim" min="11.50" max="15.00" step="0.05" value="12.65"></div>'+
+        '<button class="resetbtn" id="mwSimReset" hidden>Zurück zum Mietspiegel 2024 (12,65 €/m²)</button>'+
       '</div>'+
-      '<div class="caption" style="padding-top:12px">Rechnet mit dem Anzeigedatum weiter: Basis = Kaltmiete vor 36 Monaten laut Historie. Die 15 % gelten, solange die Gemeinde in der BW-Gebietskulisse liegt (Verordnung zunächst bis Ende 2026); außerhalb der Kulisse gälten 20 % ('+eur(basisHeute*1.2)+'). Der Simulator verschiebt nur die Vergleichsmiete — Startwert '+MW.spiegelStand+'. Rechtsstand geprüft am '+RECHTSSTAND.geprueft+'.</div>';
+      '<div style="margin-top:14px"><button class="expand" aria-expanded="false" data-t="mwCalc">Rechenweg &amp; Sperrfristen <span class="chev">▾</span></button></div>'+
+      '<div class="breakdown" id="mwCalc" style="padding:6px 0 0"></div>'+
+      '<div class="caption" style="padding-top:12px">Rechnet mit dem Anzeigedatum weiter: Kappungsbasis = Kaltmiete vor 36 Monaten laut Historie. Die 15 % gelten, solange die Gemeinde in der BW-Gebietskulisse liegt (Verordnung zunächst bis Ende 2026); außerhalb der Kulisse gälten 20 % ('+eur(basisHeute*1.2)+'). Rechtsstand geprüft am '+RECHTSSTAND.geprueft+'.</div>';
+    function gauge(spiegelDeckel,max){
+      const W=660,Hh=118,padL=46,padR=18,axY=70;
+      const lo=Math.floor(Math.min(kappHeute,11.5*VERTRAG.flaecheA,cur.kalt)/50)*50;
+      const hi=Math.ceil(Math.max(kappHeute,15*VERTRAG.flaecheA,cur.kalt)/50)*50;
+      const X=v=>padL+(W-padL-padR)*((v-lo)/(hi-lo));
+      const anch=v=>X(v)>W-95?"end":(X(v)<padL+95?"start":"middle");
+      let s='<svg viewBox="0 0 '+W+' '+Hh+'" width="100%" role="img" aria-label="Deckel-Skala: Kappungsgrenze, Vergleichsmiete und aktuelle Kaltmiete auf einer Achse">';
+      s+='<rect x="'+padL+'" y="'+(axY-9)+'" width="'+Math.max(0,X(max)-padL).toFixed(1)+'" height="18" rx="4" fill="var(--good-bg)" data-svgtip="Zulässiger Bereich für eine neue Kaltmiete: bis '+eur(max)+'"/>';
+      s+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+axY+'" y2="'+axY+'" stroke="var(--line)" stroke-width="1.5"/>';
+      for(let v=Math.ceil(lo/100)*100;v<=hi;v+=100){s+='<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+(axY-4)+'" y2="'+(axY+4)+'" stroke="var(--line)"/><text x="'+X(v).toFixed(1)+'" y="'+(axY+16)+'" text-anchor="middle" class="axis">'+v.toLocaleString("de-DE")+'</text>';}
+      const mark=(v,y1,y2,col,wd,tip)=>'<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+y1+'" y2="'+y2+'" stroke="'+col+'" stroke-width="'+wd+'" data-svgtip="'+tip+'"/>';
+      const lab=(v,y,col,txt)=>'<text x="'+X(v).toFixed(1)+'" y="'+y+'" text-anchor="'+anch(v)+'" font-size="11" font-weight="700" fill="'+col+'" class="lbl">'+txt+'</text>';
+      s+=mark(kappHeute,44,axY+9,"var(--crit)",2,"Kappungsgrenze heute: "+eur(kappHeute)+" (Basis "+eur(basisHeute)+" + 15 %)");
+      s+=lab(kappHeute,38,"var(--crit)","Kappung 15 %: "+eur0(kappHeute)+" €");
+      s+=mark(spiegelDeckel,axY-9,96,"var(--ochre)",2,"Vergleichsmieten-Deckel: "+eur(spiegelDeckel));
+      s+=lab(spiegelDeckel,110,"var(--ochre)","Vergleichsmiete: "+eur0(spiegelDeckel)+" €");
+      s+=mark(cur.kalt,20,96,"var(--brand)",3,"Deine Kaltmiete: "+eur(cur.kalt));
+      s+=lab(cur.kalt,14,"var(--brand)","Deine Miete: "+eur0(cur.kalt)+" €");
+      s+='</svg>';
+      const host=document.getElementById("mwGauge");
+      host.innerHTML=s+'<div class="caption" style="padding-top:2px">Grün = Bereich, in dem eine neue Kaltmiete heute zulässig wäre (bis zum niedrigeren der beiden Deckel). Liegt „Deine Miete" rechts vom grünen Bereich, gibt es keinen Spielraum.</div>';
+      host.querySelectorAll("[data-svgtip]").forEach(nd=>{nd.style.cursor="pointer";
+        nd.addEventListener("mousemove",e=>showPop(e,"<b>"+nd.getAttribute("data-svgtip")+"</b>"));nd.addEventListener("mouseleave",hidePop);});
+    }
     function upd(){
       const sp=+document.getElementById("msim").value, spF=sp.toLocaleString("de-DE",{minimumFractionDigits:2});
       document.getElementById("msimV").textContent=spF+" €/m²";
       const spiegelDeckel=sp*VERTRAG.flaecheA, max=Math.min(kappHeute,spiegelDeckel), spielraum=max-cur.kalt;
-      const sim=Math.abs(sp-MW.spiegel)>0.001?' — <b>Simulation</b> mit '+spF+' €/m²':'';
-      document.getElementById("mwSpiegelK").textContent="Vergleichsmieten-Deckel ("+spF+" €/m² × 83,8 m²)";
-      document.getElementById("mwSpiegel").textContent=eur(spiegelDeckel);
-      document.getElementById("mwMax").textContent=eur(max);
+      const simActive=Math.abs(sp-MW.spiegel)>0.001;
+      const simSuffix=simActive?' — Simulation mit Vergleichsmiete '+spF+' €/m².':'';
+      document.getElementById("mwSimBadge").hidden=!simActive;
+      document.getElementById("mwSimReset").hidden=!simActive;
       document.getElementById("mwHead").innerHTML=spielraum>0.005
-        ?'<div class="fc-big due">+'+eur(spielraum)+'</div><div class="fc-sub">wäre heute als Erhöhung maximal durchsetzbar (bindender Deckel '+eur(max)+')'+sim+'</div>'
-        :'<div class="fc-big credit">0,00 €</div><div class="fc-sub">Erhöhungs-Spielraum heute — der bindende Deckel ('+eur(max)+') liegt '+(max<cur.kalt?eur(cur.kalt-max)+' unter':'auf Höhe')+' der aktuellen Kaltmiete'+sim+'</div>';
-      if(nextD){const basisN=rentAt(addM(nextD,-36)),maxN=Math.min(basisN*(1+MW.kapp),spiegelDeckel);
-        document.getElementById("mwNextK").textContent="Vorschau ab "+fmtD(nextD)+" (neue Basis "+eur(basisN)+")";
-        document.getElementById("mwNext").textContent=maxN-cur.kalt>0.005?"+"+eur(maxN-cur.kalt)+" möglich":"weiter kein Spielraum";}
+        ?'<div class="mw-verdict due"><div class="mw-ic">!</div><div><div class="mw-t">Dein Vermieter könnte bis zu +'+eur(spielraum)+'/Monat verlangen</div><div class="mw-why">Maximal zulässige neue Kaltmiete: <b>'+eur(max)+'</b> ('+(kappHeute<=spiegelDeckel?'die 15-%-Kappungsgrenze':'der Vergleichsmieten-Deckel')+' ist bindend). Jedes Erhöhungsschreiben gegen diesen Wert prüfen.'+simSuffix+'</div></div></div>'
+        :'<div class="mw-verdict ok"><div class="mw-ic">✓</div><div><div class="mw-t">Derzeit kann dein Vermieter die Miete nicht wirksam erhöhen</div><div class="mw-why">Deine Kaltmiete (<b>'+eur(cur.kalt)+'</b>) liegt bereits '+eur(cur.kalt-max)+' über dem Deckel, der heute für eine Erhöhung gälte (<b>'+eur(max)+'</b>).'+simSuffix+'</div></div></div>';
+      let basisN=null,maxN=null,nx;
+      if(nextD){basisN=rentAt(addM(nextD,-36));maxN=Math.min(basisN*(1+MW.kapp),spiegelDeckel);const dN=maxN-cur.kalt;
+        nx=dN>0.005
+          ?'Frühestens <b>ab '+fmtD(nextD)+'</b> gibt es wieder Spielraum: bis zu <b>'+eur(maxN)+'</b> (+'+eur(dN)+'/Monat)'+(simActive?' — bei simulierter Vergleichsmiete '+spF+' €/m².':' — falls die Vergleichsmiete ('+MW.spiegelStand+') bis dahin unverändert bleibt.')
+          :'Auch <b>ab '+fmtD(nextD)+'</b> (neue Kappungsbasis '+eur(basisN)+') zunächst kein Spielraum — die Vergleichsmiete deckelt bei '+eur(spiegelDeckel)+'.';
+      } else nx='Keine Änderung der Kappungsbasis absehbar — der Deckel bewegt sich erst mit einem neuen Mietspiegel.';
+      document.getElementById("mwNextRow").innerHTML=nx;
+      gauge(spiegelDeckel,max);
+      document.getElementById("mwCalc").innerHTML=
+        kv("Kappungsbasis — Kaltmiete am "+fmtD(addM(heute,-36)),eur(basisHeute))+
+        kv("+ 15 % = Kappungsgrenze (§ 558 III BGB · seit "+MW.kulisseSeit+")",eur(kappHeute))+
+        kv("Vergleichsmieten-Deckel ("+spF+" €/m² × 83,8 m²)",eur(spiegelDeckel))+
+        kv("Bindend ist der niedrigere Deckel",eur(max),"strong")+
+        kv("Deine aktuelle Kaltmiete",eur(cur.kalt))+
+        kv("Spielraum heute",spielraum>0.005?"+"+eur(spielraum):"kein Spielraum ("+eur(cur.kalt-max)+" über dem Deckel)")+
+        (nextD?kv("Ab "+fmtD(nextD)+" — neue Basis "+eur(basisN),maxN-cur.kalt>0.005?"+"+eur(maxN-cur.kalt)+" möglich":"weiter kein Spielraum"):"")+
+        kv("Sperrfrist (§ 558 I BGB)","Neues Verlangen zulässig seit "+fmtD(verlangenAb)+" · neue Miete gälte frühestens ab Beginn des 3. Monats nach Zugang (§ 558b II)");
       bindInfos(panel);
     }
     document.getElementById("msim").addEventListener("input",upd);
+    document.getElementById("mwSimReset").addEventListener("click",()=>{document.getElementById("msim").value=MW.spiegel;upd();});
     upd();
     const erhBasis=rentAt(addM(pDt(cur.an),-36));
     const erhPct=((cur.kalt/erhBasis-1)*100).toFixed(1).replace(".",",");
     const MWNOTES=[
-      {s:"info",t:"Erhöhung 2025 geprüft — kappungskonform",d:"+"+erhPct+" % gegenüber der Kaltmiete drei Jahre vor Zugang des Verlangens ("+cur.an+"). Damals galt hier die Standard-Kappung 20 % — die Gemeinde lag 2020–2025 nicht in der BW-Gebietskulisse: Deckel "+eur(erhBasis*1.2)+" über der neuen Kaltmiete "+eur(cur.kalt)+" ✓. Auch der Vergleichsmieten-Deckel war eingehalten (12,50 &lt; 12,65 €/m²). Geprüft am 10.07.2026 — Details in den Offenen Punkten der Übersicht."},
+      {s:"warn",t:"Wenn ein Erhöhungsschreiben kommt — 4 Schritte",d:"<b>1.</b> Form prüfen: Textform mit Begründung, z. B. Mietspiegel (§ 558a BGB). <b>2.</b> Die verlangte neue Kaltmiete gegen den Deckel im Check links halten — alles darüber ist unwirksam; du kannst auch nur teilweise zustimmen. <b>3.</b> Zeit nehmen: Zustimmung ist erst bis Ende des 2. Monats nach Zugang fällig (§ 558b II) — nichts vorschnell unterschreiben. <b>4.</b> Bei jeder Erhöhung hast du ein Sonderkündigungsrecht (§ 561)."},
       {s:"crit",t:"Seit 01.01.2026 gilt hier 15 % statt 20 %",d:"Die Gemeinde liegt in der neuen BW-Gebietskulisse (130 Kommunen, Verordnung zunächst bis 31.12.2026). Zusätzlich gilt die Mietpreisbremse — sie betrifft aber nur Neuvermietungen, nicht den laufenden Vertrag."},
-      {s:"info",t:"Vergleichsmiete ist die zweite Grenze",d:"Jede Erhöhung endet an der ortsüblichen Vergleichsmiete (§ 558 I BGB) — zuletzt "+MW.spiegelStand+" mit 12,65 €/m². Erst ein neuer Mietspiegel verschiebt diesen Deckel — im Simulator oben durchspielbar; jedes Erhöhungsschreiben daran messen."},
-      {s:"info",t:"Verfahren &amp; deine Rechte",d:"Textform mit Begründung (§ 558a) · Überlegungsfrist: Zustimmung erst bis Ende des 2. Monats nach Zugang (§ 558b II) · Sonderkündigungsrecht bei jeder Erhöhung (§ 561)."}
+      {s:"info",t:"So funktioniert der Check: zwei Deckel, der niedrigere zählt",d:"<b>Kappungsgrenze:</b> höchstens +15 % auf die Kaltmiete von vor 36 Monaten (§ 558 III). <b>Vergleichsmiete:</b> Mietspiegel-Wert × Wohnfläche als absolute Obergrenze (§ 558 I) — zuletzt "+MW.spiegelStand+" mit 12,65 €/m². Eine Erhöhung muss unter BEIDEN Deckeln bleiben; die Skala links zeigt alle drei Werte auf einer Achse."},
+      {s:"info",t:"Erhöhung 2025 geprüft — kappungskonform",d:"+"+erhPct+" % gegenüber der Kaltmiete drei Jahre vor Zugang des Verlangens ("+cur.an+"). Damals galt hier die Standard-Kappung 20 % — die Gemeinde lag 2020–2025 nicht in der BW-Gebietskulisse: Deckel "+eur(erhBasis*1.2)+" über der neuen Kaltmiete "+eur(cur.kalt)+" ✓. Auch der Vergleichsmieten-Deckel war eingehalten (12,50 &lt; 12,65 €/m²). Geprüft am 10.07.2026 — Details in den Offenen Punkten der Übersicht."}
     ];
     MWNOTES.forEach(n=>{const it=el("div","note-item");it.innerHTML='<div class="ic sev-'+n.s+'">'+(n.s==="crit"?"!":n.s==="warn"?"›":"i")+'</div><div class="tx"><b>'+n.t+'</b><br>'+n.d+'</div>';nb.appendChild(it);});
   })();
