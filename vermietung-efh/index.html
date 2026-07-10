@@ -127,6 +127,13 @@
   .lawbanner b{color:var(--crit)}
   .lawbanner.soft{background:var(--warn-bg);border-color:#E8D3A8;color:#6b4a12} .lawbanner.soft b{color:var(--warn)}
 
+  .moncal{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:12px 0 16px}
+  .moncal .mc{border-radius:8px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:var(--ink-faint);border:1.5px dashed var(--line);background:var(--surface-2)}
+  .moncal .mc b{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+  .moncal .mc small{font-variant-numeric:tabular-nums}
+  .moncal .mc.paid{background:var(--brand);border:1.5px solid var(--brand);color:#C7D6E8} .moncal .mc.paid b{color:#fff}
+  .moncal .mc.due{border:1.5px solid var(--warn);color:var(--warn);background:var(--warn-bg)} .moncal .mc.due b{color:var(--warn)}
+  @media(max-width:560px){.moncal{grid-template-columns:repeat(4,1fr)}}
   .scale{padding:6px 0 2px}
   .scale .sc-track{position:relative;height:26px;background:var(--surface-2);border-radius:6px;overflow:visible;margin:26px 8px 30px}
   .scale .sc-fill{position:absolute;top:0;left:0;height:100%;background:var(--brand);border-radius:6px 0 0 6px}
@@ -174,9 +181,9 @@
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">Vermietung Einfamilienhaus · Vermietersicht</div>
-      <h1>Vermieter-Cockpit</h1>
-      <div class="sub"><span data-pii="objekt">XX</span> · EFH Bj. 1969 · 207,4 m² Wohnfläche · vermietet seit 01.06.2026</div>
+      <div class="eyebrow">Vermieter-Cockpit · Vermietersicht</div>
+      <h1>Einfamilienhaus <span data-pii="strasse">XX</span></h1>
+      <div class="sub"><span data-pii="objekt">XX</span> · Bj. 1969 · 207,4 m² Wohnfläche · vermietet seit 01.06.2026</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
       <div class="roletag">Ich = Vermieter</div>
@@ -201,7 +208,7 @@
     <h3>Persönliche Angaben lokal einblenden</h3>
     <p>Lade deine Schlüssel-Datei (JSON) oder füge sie ein — sie bleibt nur in diesem Browser-Tab, nichts wird hochgeladen oder gespeichert. Beim Neuladen der Seite ist alles wieder „XX".</p>
     <div class="pii-drop" id="piiDrop">Schlüssel-Datei hierher ziehen oder <label class="pii-btn">Datei wählen<input type="file" id="piiFile" accept=".json,application/json" hidden></label></div>
-    <textarea id="piiText" placeholder='{ "objekt": "…", "ort": "…", "vermieter": "…", "mieter": "…", "iban": "…" }'></textarea>
+    <textarea id="piiText" placeholder='{ "objekt": "…", "strasse": "…", "ort": "…", "vermieter": "…", "mieter": "…", "iban": "…" }'></textarea>
     <div class="pii-actions"><button class="pii-btn primary" id="piiApply">Einblenden</button><button class="pii-btn" id="piiClear">Wieder verbergen (XX)</button></div>
     <div class="pii-err" id="piiErr"></div>
   </div>
@@ -231,6 +238,28 @@
       <div class="note">Markt ~12,9 €/m² · Erhöhung ab 06/2027 → Radar</div>
     </div>
   </div>
+
+  <section style="margin-top:24px">
+    <div class="fcgrid">
+      <div class="card chartcard">
+        <div class="chart-head"><h3>Einnahmen 2026 <span class="info" tabindex="0" data-tip="Miet-Soll 2.575 €/Monat ab 01.06.2026. Blau = eingegangen, gestrichelt = Monat noch nicht angelaufen, orange = angelaufen aber noch nicht als bezahlt erfasst. Die Kaution (5.000 €) ist keine Einnahme — sie wird nur verwahrt.">i</span></h3>
+          <div class="legend"><span><i style="background:var(--brand)"></i>eingegangen</span><span><i style="background:var(--surface-2);border:1.5px dashed var(--line)"></i>erwartet</span></div></div>
+        <div class="moncal" id="einKal"></div>
+        <div class="fc-meta strong"><span class="k">Bisher eingenommen</span><span class="v" id="einSum">–</span></div>
+        <div class="fc-meta"><span class="k">Prognose Gesamtjahr 2026 (Jun–Dez)</span><span class="v">18.025,00 €</span></div>
+        <div class="fc-meta"><span class="k">davon Kaltmiete / BK-Durchlauf</span><span class="v">14.700 € / 3.325 €</span></div>
+        <div class="fc-meta"><span class="k">Kaution verwahrt (keine Einnahme)</span><span class="v">5.000,00 €</span></div>
+      </div>
+      <div class="card notes">
+        <h3>Wie läuft die Immobilie? <span class="info" tabindex="0" data-tip="Gesamtlage auf einen Blick: grün = läuft, orange = Stammdaten/Pflege fehlt, rot = Handlungsbedarf mit rechtlichem oder finanziellem Risiko.">i</span></h3>
+        <div class="op"><div class="oh"><span class="pill good">pünktlich</span><b>Mieteingang</b></div><div class="od">Alle fälligen Monate voll bezahlt, Rückstand 0 €.</div></div>
+        <div class="op"><div class="oh"><span class="pill good">komplett</span><b>Kaution</b></div><div class="od">5.000 € erhalten und insolvenzfest angelegt — Pflicht aus § 551 III erfüllt.</div></div>
+        <div class="op"><div class="oh"><span class="pill good">solide</span><b>Wirtschaftlichkeit</b></div><div class="od">BK-Puffer +30,77 €/M; Miete 10,13 €/m² unter Markt → Potenzial +315 €/M ab 09/2027 (Kappungsdeckel).</div></div>
+        <div class="op"><div class="oh"><span class="pill crit">Handlungsbedarf</span><b>Dokumente &amp; Recht</b></div><div class="od">Energieausweis fehlt (Bußgeldrisiko bis 10.000 €); Übergabedaten (Zähler, Heizöl) nur auf Papier.</div></div>
+        <div class="op"><div class="oh"><span class="pill warn">unvollständig</span><b>Technik-Stammdaten</b></div><div class="od">Kesseltyp/-alter (GEG-Check), Öltankdaten (AwSV), Feuerstättenbescheid und Rücklagen-Ist fehlen im Cockpit.</div></div>
+      </div>
+    </div>
+  </section>
 
   <section style="margin-top:24px">
     <div class="fcgrid">
@@ -622,6 +651,23 @@ abrTile.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preven
   const paid=mm.filter(k=>ZAHLUNGEN.bezahlt[k]!=null).length;
   document.getElementById("tPay").textContent=paid+"/"+mm.length+" ✓";
   document.getElementById("tPayNote").textContent="alle pünktlich · Rückstand 0 € · Stand 10.07.2026";
+})();
+
+/* ===== Übersicht: Einnahmen-Kalender 2026 (Jun–Dez) ===== */
+(function(){
+  const kal=document.getElementById("einKal");
+  const namen=["Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+  let sum=0;
+  namen.forEach((n,i)=>{
+    const m=5+i, key="2026-"+String(m+1).padStart(2,"0");
+    const ist=ZAHLUNGEN.bezahlt[key];
+    const begonnen=new Date(2026,m,1)<=HEUTE;
+    let cls="",txt="offen";
+    if(ist!=null){cls="paid";txt="✓ "+eur0(ist);sum+=ist;}
+    else if(begonnen){cls="due";txt="prüfen";}
+    kal.appendChild(el("div","mc "+cls,"<b>"+n+"</b><small>"+txt+"</small>"));
+  });
+  document.getElementById("einSum").textContent=eur(sum)+" ("+Object.keys(ZAHLUNGEN.bezahlt).length+" Monate)";
 })();
 
 /* ===== Übersicht: offene Punkte + Termine ===== */
