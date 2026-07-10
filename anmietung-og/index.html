@@ -1282,14 +1282,13 @@ if(HEUTE>RECHTSSTAND.bis){document.getElementById("lawBanner").innerHTML='<div c
 // Übersicht: Offene Punkte (aus objekt-daten.json > offene_punkte gespiegelt; Beträge laufen mit dem Datum mit)
 (function(){
   const host=document.getElementById("opList");if(!host)return;
-  const monSeit0326=Math.max(0,(HEUTE.getFullYear()-2026)*12+HEUTE.getMonth()-2+1);
   const OP=[
-    {s:"warn",st:"offen",t:"Überweisung seit 03/2026 um 30 € reduziert?",
-     d:"Der Vertrag über den zweiten Stellplatz endete am 28.02.2026 — seit März sind nur noch <b>1.260,10 €</b>/Monat geschuldet (statt 1.290,10 €). Falls der Dauerauftrag noch nicht angepasst ist, sind bisher "+monSeit0326+" × 30 € = "+eur0(monSeit0326*30)+" € zu viel geflossen.",
-     step:"Kontoauszüge ab 03/2026 prüfen; zu viel Gezahltes zurückfordern (§ 812 BGB) und den Dauerauftrag anpassen."},
     {s:"warn",st:"offen",t:"CO₂-Kostenaufteilung fehlt (Abrechnungen 2023 + 2024)",
      d:"Seit 2023 muss der Vermieter die CO₂-Kosten nach dem Stufenmodell aufteilen und in der Abrechnung ausweisen (§§ 5–7 CO2KostAufG) — beide Abrechnungen enthalten keinen Ausweis.",
      step:"Ausweis nachfordern oder Heizkosten um 3 % kürzen (§ 7 IV CO2KostAufG): 2023 ≈ 21,56 € · 2024 ≈ 25,82 €."},
+    {s:"good",st:"geklaert",t:"Überweisung nach Stellplatz-Kündigung angepasst",
+     d:"Seit 01.03.2026 werden korrekt <b>1.260,10 €</b>/Monat überwiesen (Stellplatz-Posten entfallen) — bestätigt am 10.07.2026. Keine Überzahlung.",
+     step:"Erledigt."},
     {s:"good",st:"geklaert",t:"Parkplatz-Nutzung 30 € war ein zweiter Stellplatz — keine Doppelberechnung",
      d:"Eigener Kfz-Stellplatz-Vertrag (Anlage vom 01.08.2023, 30 €/Mon.) über einen <b>zweiten</b> Außenstellplatz, zusätzlich zu dem aus § 2 des Mietvertrags. Die Zahlungen 08/2023–02/2026 (31 Monate = 930 €) waren geschuldet; gekündigt zum 28.02.2026 (Fahrzeug verkauft). Geklärt 10.07.2026.",
      step:"Erledigt — Belege: stellplatz.pdf (Abschrift), stellplatz-original.pdf, stellplatz-kuendigung.pdf unter mietvertrag/anlagen/."},
