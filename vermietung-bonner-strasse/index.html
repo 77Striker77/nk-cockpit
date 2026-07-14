@@ -253,14 +253,14 @@
   <div class="tabpanel on" id="panel-uebersicht" role="tabpanel">
   <div class="hero">
     <div>
-      <div class="hcap">Einnahmen seit Mietbeginn <span class="info" tabindex="0" data-tip="Summe aller eingegangenen Monatszahlungen (Kaltmiete + BK-Vorauszahlung) seit 01.06.2026, Stand der letzten Bestätigung. Die Kaution zählt nicht dazu — sie wird nur treuhänderisch verwahrt.">i</span></div>
+      <div class="hcap">Einnahmen seit Mietbeginn <span class="info" tabindex="0" data-tip="Summe aller Monatszahlungen (Kaltmiete + BK-Vorauszahlung) seit 01.06.2026. Fällige Monate gelten automatisch als bezahlt (Annahme pünktliche Zahlung); gemeldete Ausnahmen werden abgezogen. Die Kaution zählt nicht dazu — sie wird nur treuhänderisch verwahrt.">i</span></div>
       <div class="hbig num" id="heroSum">– <small>€</small></div>
       <div class="hsub" id="heroSub"></div>
     </div>
     <div class="hmeta">
       <div class="fc-meta"><span class="k">Prognose 2026 (Jun–Dez)</span><span class="v">18.025,00 €</span></div>
       <div class="fc-meta"><span class="k">davon Kaltmiete / BK-Durchlauf</span><span class="v">14.700 € / 3.325 €</span></div>
-      <div class="fc-meta"><span class="k">Rückstand</span><span class="v" style="color:var(--good)">0,00 €</span></div>
+      <div class="fc-meta"><span class="k">Rückstand</span><span class="v" id="heroRueck" style="color:var(--good)">0,00 €</span></div>
       <div class="fc-meta"><span class="k">Kaution verwahrt (keine Einnahme)</span><span class="v">5.000 € ✓</span></div>
       <div class="fc-meta"><span class="k">Nächste Miete fällig</span><span class="v" id="heroNext">–</span></div>
     </div>
@@ -281,7 +281,7 @@
       <div class="note">2.100 € kalt + 475 € BK-VZ · fällig 3. Werktag</div>
     </div>
     <div class="tile good">
-      <div class="cap">Mieteingang 2026 <span class="info" tabindex="0" data-tip="Kontoeingänge seit Mietbeginn, vom Vermieter bestätigt am 10.07.2026. Warnschwelle: Rückstand von 2 Monatsmieten erlaubt die fristlose Kündigung (§ 543 BGB).">i</span></div>
+      <div class="cap">Mieteingang <span class="info" tabindex="0" data-tip="Fällige Monate seit Mietbeginn gelten automatisch als bezahlt (Annahme pünktliche Zahlung); bleibt ein Eingang aus, wird der Monat auf Meldung als Ausnahme erfasst. Warnschwelle: Rückstand von 2 Monatsmieten erlaubt die fristlose Kündigung (§ 543 BGB).">i</span></div>
       <div class="big num" id="tPay">–</div>
       <div class="note" id="tPayNote"></div>
     </div>
@@ -300,7 +300,7 @@
   <section style="margin-top:24px">
     <div class="fcgrid">
       <div class="card chartcard">
-        <div class="chart-head"><h3>Einnahmen 2026 <span class="info" tabindex="0" data-tip="Miet-Soll 2.575 €/Monat ab 01.06.2026. Blau = eingegangen, gestrichelt = Monat noch nicht angelaufen, orange = angelaufen aber noch nicht als bezahlt erfasst. Die Kaution (5.000 €) ist keine Einnahme — sie wird nur verwahrt.">i</span></h3>
+        <div class="chart-head"><h3>Einnahmen 2026 <span class="info" tabindex="0" data-tip="Miet-Soll 2.575 €/Monat ab 01.06.2026. Blau = bezahlt (Annahme pünktliche Zahlung), gestrichelt = Monat noch nicht angelaufen, orange = als Ausnahme erfasst (kein voller Eingang). Die Kaution (5.000 €) ist keine Einnahme — sie wird nur verwahrt.">i</span></h3>
           <div class="legend"><span><i style="background:var(--brand)"></i>eingegangen</span><span><i style="background:var(--surface-2);border:1.5px dashed var(--line)"></i>erwartet</span></div></div>
         <div class="moncal" id="einKal"></div>
         <div class="fc-meta strong"><span class="k">Bisher eingenommen</span><span class="v" id="einSum">–</span></div>
@@ -310,7 +310,7 @@
       </div>
       <div class="card notes">
         <h3>Wie läuft die Immobilie? <span class="info" tabindex="0" data-tip="Gesamtlage auf einen Blick: grün = läuft, orange = Stammdaten/Pflege fehlt, rot = Handlungsbedarf mit rechtlichem oder finanziellem Risiko.">i</span></h3>
-        <div class="op"><div class="oh"><span class="pill good">pünktlich</span><b>Mieteingang</b></div><div class="od">Alle fälligen Monate voll bezahlt, Rückstand 0 €.</div></div>
+        <div class="op"><div class="oh"><span class="pill good" id="payHealthPill">pünktlich</span><b>Mieteingang</b></div><div class="od" id="payHealth">Alle fälligen Monate gelten als bezahlt (Annahme pünktliche Zahlung), Rückstand 0 €.</div></div>
         <div class="op"><div class="oh"><span class="pill good">komplett</span><b>Kaution</b></div><div class="od">5.000 € erhalten und insolvenzfest angelegt — Pflicht aus § 551 III BGB erfüllt.</div></div>
         <div class="op"><div class="oh"><span class="pill good">solide</span><b>Wirtschaftlichkeit</b></div><div class="od">BK-Puffer +30,77 €/M; Miete 10,13 €/m² unter Markt → Potenzial +315 €/M ab 09/2027 (Kappungsdeckel).</div></div>
         <div class="op"><div class="oh"><span class="pill crit">Handlungsbedarf</span><b>Dokumente &amp; Recht</b></div><div class="od">Energieausweis fehlt (Bußgeldrisiko bis 10.000 €); Übergabedaten (Zähler, Heizöl) nur auf Papier.</div></div>
@@ -367,17 +367,17 @@
         <div class="fc-meta"><span class="k">Konto</span><span class="v" data-pii="iban">XX</span></div>
         <div class="fc-meta"><span class="k">Verzugsfolgen</span><span class="v">5 PP über Basiszins + 5 € je Mahnung</span></div>
         <div class="fc-meta"><span class="k">Warnschwelle <span class="info" tabindex="0" data-tip="Bei Rückstand von 2 Monatsmieten ist die fristlose Kündigung möglich (§ 543 II Nr. 3 BGB) — gilt auch für Verzug mit der Kaution (§ 569 IIa BGB). Eskalationspfad: Gespräch → nachweisbares Schreiben → Abmahnung mit 2-Wochen-Frist → Kündigung.">i</span></span><span class="v">Rückstand ≥ 2 Monatsmieten</span></div>
-        <div class="fc-meta strong"><span class="k">Rückstand aktuell</span><span class="v" style="color:var(--good)">0,00 €</span></div>
-        <div class="fc-reco"><b>Praxis-Regel:</b> Mieteingang jeweils am Monatsanfang prüfen und hier nachtragen — verspätete Reaktion ist laut Vermieter-Foren der teuerste Standardfehler (Räumung dauert 6–12+ Monate).</div>
+        <div class="fc-meta strong"><span class="k">Rückstand aktuell</span><span class="v" id="vRueck" style="color:var(--good)">0,00 €</span></div>
+        <div class="fc-reco"><b>Praxis-Regel:</b> Kontoeingang am Monatsanfang kurz prüfen — bleibt eine Zahlung aus, genügt eine Meldung: der Monat wird als Ausnahme erfasst und das Cockpit zeigt den Rückstand. Verspätete Reaktion ist laut Vermieter-Foren der teuerste Standardfehler (Räumung dauert 6–12+ Monate).</div>
       </div>
     </div>
   </section>
 
   <section>
     <div class="sechead"><h2>Mieteingang-Tracker</h2>
-      <span class="hint">Soll je Monat 2.575 € · Stand bestätigt 10.07.2026</span></div>
+      <span class="hint">Soll je Monat 2.575 € · fällige Monate zählen automatisch als bezahlt</span></div>
     <div class="card"><div class="tblwrap"><table class="cmp mini" id="payTable"></table></div>
-      <div class="hintline" style="border:0">„Nachtragen" = Monat ist angelaufen, Eingang aber noch nicht im Cockpit erfasst. Kautionsraten liefen separat: 3 × 1.666,67 € zum 01.06. / 01.07. / 01.08.2026 — alle erhalten.</div></div>
+      <div class="hintline" style="border:0">„Fehlt" = Monat ist auf Meldung als Ausnahme erfasst (kein voller Eingang). Kautionsraten liefen separat: 3 × 1.666,67 € zum 01.06. / 01.07. / 01.08.2026 — alle erhalten.</div></div>
   </section>
 
   <section id="radar">
@@ -816,20 +816,56 @@
 const HEUTE = new Date(); HEUTE.setHours(0,0,0,0);
 const RECHTSSTAND = { geprueft: "10.07.2026", gueltigBis: new Date(2026,11,31) };
 
-const ZAHLUNGEN = { sollMonat: 2575, start: [2026,5], bezahlt: { "2026-06": 2575, "2026-07": 2575 } };
+/* Mieteingang: jeder begonnene Monat seit Mietbeginn gilt automatisch als voll bezahlt
+   (Annahme pünktliche Zahlung — Nutzerentscheidung 14.07.2026). Meldet der Vermieter eine
+   Ausnahme, hier eintragen: "2026-09": 0 (kein Eingang) oder Teilbetrag in Euro. */
+const AUSNAHMEN = {};
+const ZAHLUNGEN = (() => {
+  const sollMonat = 2575, start = [2026,5], bezahlt = {};
+  let y = start[0], m = start[1];
+  while(new Date(y,m,1) <= HEUTE){
+    const key = y+"-"+String(m+1).padStart(2,"0");
+    const ist = (key in AUSNAHMEN) ? AUSNAHMEN[key] : sollMonat;
+    if(ist > 0) bezahlt[key] = ist;
+    m++; if(m>11){m=0;y++;}
+  }
+  return { sollMonat, start, bezahlt };
+})();
+const ZSTAT = (() => {
+  let faellig = 0, summe = 0, letzter = null;
+  let y = ZAHLUNGEN.start[0], m = ZAHLUNGEN.start[1];
+  while(new Date(y,m,1) <= HEUTE){
+    const key = y+"-"+String(m+1).padStart(2,"0");
+    faellig++;
+    if(ZAHLUNGEN.bezahlt[key] != null){ summe += ZAHLUNGEN.bezahlt[key]; letzter = key; }
+    m++; if(m>11){m=0;y++;}
+  }
+  return { faellig, bezahltAnz: Object.keys(ZAHLUNGEN.bezahlt).length, summe,
+           rueckstand: faellig*ZAHLUNGEN.sollMonat - summe, letzter };
+})();
 
-const TERMINE = [
-  { d:[2026,7,15],  t:"Grundsteuer-Rate Q3",                       s:"BW-Landesgrundsteuer, vierteljährlich — umlagefähig (2026 anteilig 7/12)." },
-  { d:[2026,8,30],  t:"Heizungswartung + Objektbegehung",          s:"Fachbetrieb vor der Heizperiode (01.10.); zugleich Dach/Rinnen/Bäume dokumentieren." },
-  { d:[2026,9,31],  t:"GEG-Meilenstein: 65-%-EE ab 01.11.",        s:"Ab 01.11.2026 braucht jede NEU eingebaute Heizung 65 % EE — Bestand + Reparatur bleiben erlaubt." },
-  { d:[2026,10,15], t:"Grundsteuer Q4 · Winterdienst-Saison",      s:"Ab jetzt Stichproben-Kontrollen des Mieter-Winterdiensts dokumentieren." },
-  { d:[2026,11,31], t:"Zähler + Öltank ablesen · RWM-Nachweis · Rechtsstand-Check", s:"Periodenende der 1. Abrechnung; KappVO/Mietpreisbremse BW + Mietspiegel laufen aus." },
-  { d:[2027,1,15],  t:"Grundsteuer-Rate Q1/2027",                  s:"Weitere Raten: 15.05. / 15.08. / 15.11." },
-  { d:[2027,5,1],   t:"Mieterhöhung ab jetzt möglich (Zugang)",    s:"§ 558 BGB: Wirkung frühestens 01.09.2027 — vorher neuen Mietspiegel + Kappungs-Stand prüfen." },
-  { d:[2027,6,31],  t:"Anlage V für 2026",                         s:"Ohne Berater (§ 149 AO); mit Berater bis 29.02.2028. AfA 2 % zeitanteilig ab 06/2026." },
-  { d:[2027,9,31],  t:"Interne Deadline: BK-Abrechnung 2026",      s:"2 Monate Puffer; Zugang nachweisbar zustellen (Bote/Zeuge)." },
-  { d:[2027,11,31], t:"AUSSCHLUSSFRIST BK-Abrechnung 2026",        s:"§ 556 III BGB — danach ist jede Nachforderung verloren." }
+/* Termine: Wiederkehrer werden je Kalenderjahr erzeugt — die Liste läuft nie leer.
+   Nur echte Einmal-Termine stehen in EINMALIG. */
+const EINMALIG = [
+  { d:[2026,9,31], t:"GEG-Meilenstein: 65-%-EE ab 01.11.",     s:"Ab 01.11.2026 braucht jede NEU eingebaute Heizung 65 % EE — Bestand + Reparatur bleiben erlaubt." },
+  { d:[2027,5,1],  t:"Mieterhöhung ab jetzt möglich (Zugang)", s:"§ 558 BGB: Wirkung frühestens 01.09.2027 — vorher neuen Mietspiegel + Kappungs-Stand prüfen." }
 ];
+const TERMINE = (() => {
+  const list = [...EINMALIG];
+  for(let y = HEUTE.getFullYear(); y <= HEUTE.getFullYear()+1; y++){
+    [[1,"Q1"],[4,"Q2"],[7,"Q3"]].forEach(q =>
+      list.push({ d:[y,q[0],15], t:"Grundsteuer-Rate "+q[1]+"/"+y, s:"BW-Landesgrundsteuer, vierteljährlich (15.02. / 15.05. / 15.08. / 15.11.) — umlagefähig." }));
+    list.push({ d:[y,10,15], t:"Grundsteuer Q4 · Winterdienst-Saison", s:"Letzte Rate des Jahres; ab jetzt Stichproben-Kontrollen des Mieter-Winterdiensts dokumentieren." });
+    list.push({ d:[y,8,30],  t:"Heizungswartung + Objektbegehung",     s:"Fachbetrieb vor der Heizperiode (01.10.); zugleich Dach/Rinnen/Bäume dokumentieren." });
+    list.push({ d:[y,11,31], t:"Zähler + Öltank ablesen · RWM-Nachweis · Jahres-Check", s:"Periodenende der BK-Abrechnung — Zählerstände + Öltank-Füllstand sind die Abrechnungsbasis; zugleich Versicherungen und Rechtsstand prüfen." });
+    if(y >= 2027){
+      list.push({ d:[y,6,31],  t:"Anlage V für "+(y-1),                s:"Ohne Berater (§ 149 AO); mit Berater bis Ende Februar "+(y+1)+"." });
+      list.push({ d:[y,9,31],  t:"Interne Deadline: BK-Abrechnung "+(y-1), s:"2 Monate Puffer; Zugang nachweisbar zustellen (Bote/Zeuge)." });
+      list.push({ d:[y,11,31], t:"AUSSCHLUSSFRIST BK-Abrechnung "+(y-1),   s:"§ 556 III BGB — danach ist jede Nachforderung verloren." });
+    }
+  }
+  return list.sort((a,b) => new Date(a.d[0],a.d[1],a.d[2]) - new Date(b.d[0],b.d[1],b.d[2]));
+})();
 
 const OFFENE = [
   { p:"kritisch", t:"Energieausweis fehlt — Bedarfsausweis erstellen", d:"Vorlagepflicht bei der Vermietung 06/2026 nicht erfüllt (§ 80 GEG, Bußgeld bis 10.000 € möglich). Bj. 1969 < 5 WE → Bedarfsausweis; gilt 10 Jahre, nötig für jede künftige Neuvermietung/Verkauf.", n:"Energieberater beauftragen; Ablaufdatum ins Cockpit." },
@@ -936,37 +972,48 @@ abrTile.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preven
   }
 })();
 
-/* ===== Übersicht: Mieteingang-Tile ===== */
+/* ===== Übersicht: Mieteingang-Tile + Rückstands-Anzeigen ===== */
 (function(){
-  const mm=[];let y=ZAHLUNGEN.start[0],m=ZAHLUNGEN.start[1];
-  while(new Date(y,m,1)<=HEUTE){mm.push(y+"-"+String(m+1).padStart(2,"0"));m++;if(m>11){m=0;y++;}}
-  const paid=mm.filter(k=>ZAHLUNGEN.bezahlt[k]!=null).length;
-  document.getElementById("tPay").textContent=paid+"/"+mm.length+" ✓";
-  document.getElementById("tPayNote").textContent="alle pünktlich · Rückstand 0 € · Stand 10.07.2026";
+  const r=ZSTAT.rueckstand;
+  document.getElementById("tPay").textContent=ZSTAT.bezahltAnz+"/"+ZSTAT.faellig+(r>0?"":" ✓");
+  document.getElementById("tPayNote").textContent=r>0
+    ? "Rückstand "+eur(r)+" — Ausnahmen im Tracker"
+    : "alle fälligen Monate bezahlt · Annahme: pünktlich";
+  ["heroRueck","vRueck"].forEach(id=>{
+    const n=document.getElementById(id);
+    n.textContent=eur(r);
+    n.style.color=r>0?"var(--crit)":"var(--good)";
+  });
+  const pill=document.getElementById("payHealthPill"), od=document.getElementById("payHealth");
+  if(r>0){
+    pill.className="pill crit"; pill.textContent="Rückstand";
+    od.textContent="Rückstand "+eur(r)+" — Ausnahme erfasst; Eskalationspfad im Blick behalten (§ 543 BGB ab 2 Monatsmieten).";
+  } else {
+    od.textContent="Alle fälligen Monate gelten als bezahlt (Annahme pünktliche Zahlung), Rückstand 0 €.";
+  }
 })();
 
 /* ===== Übersicht: Einnahmen-Kalender 2026 (Jun–Dez) ===== */
 (function(){
   const kal=document.getElementById("einKal");
   const namen=["Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
-  let sum=0;
+  let sum=0,n26=0;
   namen.forEach((n,i)=>{
     const m=5+i, key="2026-"+String(m+1).padStart(2,"0");
     const ist=ZAHLUNGEN.bezahlt[key];
     const begonnen=new Date(2026,m,1)<=HEUTE;
     let cls="",txt="offen";
-    if(ist!=null){cls="paid";txt="✓ "+eur0(ist);sum+=ist;}
-    else if(begonnen){cls="due";txt="prüfen";}
+    if(ist!=null){cls="paid";txt="✓ "+eur0(ist);sum+=ist;n26++;}
+    else if(begonnen){cls="due";txt="fehlt";}
     kal.appendChild(el("div","mc "+cls,"<b>"+n+"</b><small>"+txt+"</small>"));
   });
-  document.getElementById("einSum").textContent=eur(sum)+" ("+Object.keys(ZAHLUNGEN.bezahlt).length+" Monate)";
-  /* Hero füllen */
-  const keys=Object.keys(ZAHLUNGEN.bezahlt).sort();
-  const letzter=keys[keys.length-1];
-  const ln=new Date(+letzter.slice(0,4),+letzter.slice(5,7)-1,1).toLocaleDateString("de-DE",{month:"long",year:"numeric"});
-  document.getElementById("heroSum").innerHTML=Math.round(sum).toLocaleString("de-DE")+' <small>€</small>';
-  document.getElementById("heroSub").textContent=keys.length+" von "+keys.length+" fälligen Monaten voll bezahlt · zuletzt "+ln;
-  const nx=new Date(+letzter.slice(0,4),+letzter.slice(5,7),1);
+  document.getElementById("einSum").textContent=eur(sum)+" ("+n26+" Monate)";
+  /* Hero füllen — seit Mietbeginn, jahresübergreifend */
+  const lz=ZSTAT.letzter;
+  const ln=lz?new Date(+lz.slice(0,4),+lz.slice(5,7)-1,1).toLocaleDateString("de-DE",{month:"long",year:"numeric"}):"—";
+  document.getElementById("heroSum").innerHTML=Math.round(ZSTAT.summe).toLocaleString("de-DE")+' <small>€</small>';
+  document.getElementById("heroSub").textContent=ZSTAT.bezahltAnz+" von "+ZSTAT.faellig+" fälligen Monaten bezahlt · zuletzt "+ln;
+  const nx=new Date(HEUTE.getFullYear(),HEUTE.getMonth()+1,1);
   document.getElementById("heroNext").textContent=nx.toLocaleDateString("de-DE",{month:"long",year:"numeric"})+" · 3. Werktag";
 })();
 
@@ -990,7 +1037,7 @@ abrTile.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preven
     wrap.appendChild(el("div","gc"+(m.paid?"":" exp"),lab+'<i style="height:'+h+'px"></i><small>'+m.n+'</small>'));
   });
   wrap.setAttribute("aria-label","Kumulierte Mieteinnahmen 2026: bisher "+eur0(cumPaid)+" eingenommen, Prognose bis Dezember "+eur0(ziel));
-  document.getElementById("growCaption").innerHTML='<b style="color:var(--brand)">'+eur0(cumPaid)+' sind schon da</b> — jeden Monat kommen '+eur0(ZAHLUNGEN.sollMonat)+' dazu, Kurs: '+eur0(ziel)+' bis Silvester. Und ab 09/2027 sind bis zu +315 €/Monat mehr drin (<a href="#" id="growJump">Erhöhungs-Radar</a>).';
+  document.getElementById("growCaption").innerHTML='<b style="color:var(--brand)">'+eur0(cumPaid)+' sind schon da</b> — jeden Monat kommen '+eur0(ZAHLUNGEN.sollMonat)+' dazu, Kurs: '+eur0(ziel)+' bis Ende 2026. Und ab 09/2027 sind bis zu +315 €/Monat mehr drin (<a href="#" id="growJump">Erhöhungs-Radar</a>).';
   document.getElementById("growJump").addEventListener("click",e=>{e.preventDefault();jump("vertrag","radar");});
 })();
 
@@ -1008,28 +1055,29 @@ abrTile.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preven
       const pill=dd<0?'<span class="pill crit">überfällig</span>':dd<=30?'<span class="pill warn">in '+dd+' T.</span>':'<span class="pill mut">in '+dd+' T.</span>';
       tl.appendChild(el("div","term",'<span class="td num">'+dFmt(t.date)+'</span><span class="tt">'+t.t+'<small>'+t.s+'</small></span>'+pill));
     });
-  document.getElementById("standLine").textContent="Datenstand: Mietvertrag V1.0 · NK-Vorausschau 03.05.2026 · Zahlungen bestätigt 10.07.2026 · Rechtsstand geprüft 10.07.2026 · Sanierungsangaben 13.07.2026";
+  document.getElementById("standLine").textContent="Datenstand: Mietvertrag V1.0 · NK-Vorausschau 03.05.2026 · Mieteingang: Annahme pünktliche Zahlung, Ausnahmen auf Meldung (seit 14.07.2026) · Rechtsstand geprüft 10.07.2026 · Sanierungsangaben 13.07.2026";
 })();
 
 /* ===== Abrechnungs-Countdown-Tile ===== */
 (function(){
-  const frist=new Date(2027,11,31);
-  document.getElementById("tAbr").innerHTML='in '+Math.round(tage(frist)/30)+' <small>Mon.</small>';
+  const rest=tage(new Date(2027,11,31));
+  document.getElementById("tAbr").innerHTML=rest>=0?'in '+Math.round(rest/30)+' <small>Mon.</small>':'<small>abgelaufen</small>';
 })();
 
-/* ===== Zahlungs-Tabelle (Jun 2026 – Mai 2027) ===== */
+/* ===== Zahlungs-Tabelle (ab Mietbeginn, rollierend: fällige Monate + 4 Vorschau, min. 12) ===== */
 (function(){
   const t=document.getElementById("payTable");
   let h='<tr><th>Monat</th><th>Soll</th><th>Ist</th><th style="text-align:left">Status</th></tr>';
   let y=2026,m=5,sumS=0,sumI=0;
-  for(let i=0;i<12;i++){
+  const rows=Math.max(12,ZSTAT.faellig+4);
+  for(let i=0;i<rows;i++){
     const key=y+"-"+String(m+1).padStart(2,"0");
     const name=new Date(y,m,1).toLocaleDateString("de-DE",{month:"long",year:"numeric"});
     const ist=ZAHLUNGEN.bezahlt[key];
     const begonnen=new Date(y,m,1)<=HEUTE;
     let status,istTxt="–";
     if(ist!=null){status='<span class="pill good">✓ bezahlt</span>';istTxt=eur(ist);sumS+=ZAHLUNGEN.sollMonat;sumI+=ist;}
-    else if(begonnen){status='<span class="pill warn">nachtragen</span>';sumS+=ZAHLUNGEN.sollMonat;}
+    else if(begonnen){status='<span class="pill warn">fehlt</span>';sumS+=ZAHLUNGEN.sollMonat;}
     else{status='<span class="pill mut">— offen</span>';}
     h+='<tr><td>'+name+'</td><td>'+eur(ZAHLUNGEN.sollMonat)+'</td><td>'+istTxt+'</td><td class="tl">'+status+'</td></tr>';
     m++;if(m>11){m=0;y++;}
@@ -1104,7 +1152,8 @@ abrTile.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preven
     { d:[2027,6,31],  t:"Anlage V 2026 — ohne Berater", s:"§ 149 AO, elektronisch via ELSTER. Auch ein Verlust (Dach 2026) will erklärt werden — er senkt die Steuer aufs übrige Einkommen." },
     { d:[2028,1,29],  t:"Anlage V 2026 — mit Steuerberater", s:"Verlängerte Frist bei Mitwirkung eines Beraters; bis dahin auch die § 82b-Entscheidung (sofort vs. verteilen) treffen." }
   ];
-  tile.innerHTML='in '+Math.round(tage(new Date(2027,6,31))/30)+' <small>Mon.</small>';
+  const restV=tage(new Date(2027,6,31));
+  tile.innerHTML=restV>=0?'in '+Math.round(restV/30)+' <small>Mon.</small>':'<small>abgelaufen</small>';
   const fristTile=document.getElementById("tStFrist");
   fristTile.addEventListener("click",()=>jump("steuern","steuerfristen"));
   fristTile.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();jump("steuern","steuerfristen");}});
